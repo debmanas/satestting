@@ -8,7 +8,11 @@ Parameters:
   RepositoryName:
     Description: >
       Name of the AWS CodeCommit that you wish to create, where you can push the code related to Service Catalog
+    Default: satestting
     Type: String
+  BranchName:
+    Default: master
+    Type: String  
 Resources:
   ServiceCatalogRepo:
     Type: AWS::CodeCommit::Repository
@@ -146,7 +150,6 @@ Resources:
           artifacts:
             files: scripts/samtemplate.yaml
             discard-paths: yes
-
       TimeoutInMinutes: 10
       Tags:
         - Key: Name
@@ -221,10 +224,14 @@ Resources:
                 Category: Source
                 Owner: AWS
                 Version: 1
-                Provider: CodeCommit
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: SourceOutput
               Configuration:
-                RepositoryName: !GetAtt ServiceCatalogRepo.Name
-                BranchName: master
+                Owner: !Ref GitHubOwner
+                Repo: !Ref RepositoryName
+                Branch: !Ref BranchName
+                OAuthToken: {{resolve:secretsmanager:MyGitHubSecret:SecretString:token}}
               OutputArtifacts:
                 - Name: SCCheckoutArtifact
               RunOrder: 1
